@@ -4,8 +4,8 @@ import sys
 
 
 if __name__ == "__main__":
-    INPUT_CSV = "scan\\list\\Overwatch STU type list.csv"  # Sombra's current list of STU types
-    INPUT_CSV2 = "scan\\list\\Overwatch STU type list.csv"  # dynaomi's list of STU fields
+    INPUT_CSV = "list\\Overwatch STU type list.csv"  # Sombra's current list of STU types
+    INPUT_CSV2 = "list\\Overwatch STU type list.csv"  # dynaomi's list of STU fields
     OUTPUT_CSV = "out\\output.csv"
     LOG_FILE = "out\\log.txt"
     LOG_TO_FILE = True
