@@ -2,10 +2,10 @@ import csv
 import itertools
 import os
 import time
-from multiprocessing import Process, Queue, JoinableQueue
+from multiprocessing import Process, Queue
 
 cdef extern  from "crc2.h":
-    unsigned int iolib_crc32(unsigned int previousCrc32, unsigned char *buf, unsigned int len)
+    unsigned int iolib_crc32(unsigned int previous_crc, unsigned char *buf, unsigned int length)
 
 cdef str crc32b(str s):
     cdef bytes b = bytes(s, 'utf-8')
@@ -44,41 +44,6 @@ class WriterProcess(Process):
                     log_file.write('{}: {}\n'.format(n[2], n[1]))
 
 
-cdef bint check_grammar(str string):
-
-    cdef int prev_num = 0
-    cdef str last_char = ""
-    cdef int lchar_count = 0
-    cdef vchar_count = 0
-    cdef str l
-
-    for l in string:
-        if l.isnumeric():
-            prev_num += 1
-        else:
-            prev_num = 0
-        if prev_num >= 4:
-            return False
-
-        if last_char == l:
-            lchar_count += 1
-        else:
-            lchar_count = 0
-        if lchar_count >= 3:
-            return False
-        last_char = l
-
-        if vchar_count >= 3:
-            return False
-        if l in 'aeiou':
-            vchar_count += 1
-        else:
-            vchar_count = 0
-
-    return True
-
-
-
 
 class WorkerProcess(Process):
     def __init__(self, todo_list, read_queue, write_queue, log_fails):
@@ -114,13 +79,6 @@ class WorkerProcess(Process):
 
 def do_the_things(str input_csv, str input_csv2, str output_csv, bint log_to_file, str log_file_path, bint log_fails, max_str_length, max_processes):
     assert crc32b('stuconfigvar') == 'BFD9AADD'
-    permitted_chars = [*'abcdefghijklmnopqrstuvwxyz01234567890_']
-
-    s1 = time.time()
-    for i in range(1000000):
-        check_grammar('hellpp')
-    e1 = time.time()
-    print("Grammar time benchmark: {}".format(e1-s1))
 
     s2 = time.time()
     for i in range(1000000):
@@ -129,7 +87,7 @@ def do_the_things(str input_csv, str input_csv2, str output_csv, bint log_to_fil
     print("Time benchmark: {}".format(e2-s2))
 
     cdef list todo_list = []
-    cdef should_log = log_file_path is not None and log_to_file
+    cdef bint should_log = log_file_path is not None and log_to_file
     cdef list fieldnames
     if should_log:
         open(log_file_path, 'w').close()  # clear
@@ -144,12 +102,12 @@ def do_the_things(str input_csv, str input_csv2, str output_csv, bint log_to_fil
 
     # todo_list = [d['Hash'] for d in filter(lambda x: x[' Name'] != ' N/A', list(reader))]
     # [*filter(lambda x: x[' Name'] == ' N/A', list(reader))]
-    print(len(todo_list))
+    print("TODO count: {}".format(len(todo_list)))
 
     fieldnames = ['Hash', 'Name']
     with open(output_csv, 'r') as output_csv_file:
         if os.fstat(output_csv_file.fileno()).st_size > 0:
-            input("Warning: {}, has data. are you sure? (press enter) ".format(output_csv))
+            input("Warning: {} has data, are you sure? (press enter) ".format(output_csv))
     with open(output_csv, 'w') as output_csv_file:
         writer = csv.DictWriter(output_csv_file, fieldnames=fieldnames)
         if os.fstat(output_csv_file.fileno()).st_size == 0 or not csv.Sniffer().has_header(

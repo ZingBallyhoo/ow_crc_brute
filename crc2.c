@@ -626,9 +626,9 @@ const uint32_t Crc32Lookup[16][256] =
 // #endif
 
 /// compute CRC32 (Slicing-by-16 algorithm)
-uint32_t crc32_16bytes(const void* data, size_t length, uint32_t previousCrc32)
+uint32_t crc32_16bytes(const void* data, size_t length, uint32_t previous_crc)
 {
-  uint32_t crc = ~previousCrc32; // same as previousCrc32 ^ 0xFFFFFFFF
+  uint32_t crc = ~previous_crc; // same as previous_crc ^ 0xFFFFFFFF
   const uint32_t* current = (const uint32_t*) data;
 
   // enabling optimization (at least -O2) automatically unrolls the inner for-loop
@@ -700,8 +700,8 @@ uint32_t crc32_16bytes(const void* data, size_t length, uint32_t previousCrc32)
 }
 
 // zlib style interface
-uint32_t iolib_crc32(uint32_t previousCrc32, unsigned char *buf, unsigned int len) {
-    return crc32_16bytes(buf, len, previousCrc32);
+uint32_t iolib_crc32(uint32_t previous_crc, unsigned char *buf, unsigned int length) {
+    return crc32_16bytes(buf, length, previous_crc);
 }
 
 // #endif
